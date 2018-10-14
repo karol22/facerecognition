@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
-import Signin from './components/Signin/Signin'
-import Navigation from './components/Navigation/Navigation'
-import FaceRecognition from './components/FaceRecognition/FaceRecognition'
-import Logo from './components/Logo/Logo'
-import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm'
-import Rank from './components/Rank/Rank'
+import Signin from './components/Signin/Signin';
+import Register from './components/Register/Register';
+import Navigation from './components/Navigation/Navigation';
+import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import Logo from './components/Logo/Logo';
+import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
+import Rank from './components/Rank/Rank';
 import './App.css';
 import Clarifai from 'clarifai';
 
@@ -33,7 +34,7 @@ class App extends Component {
       imageURL: '',
       box: {},
       route: 'signin',
-
+      isSignedIn: false,
     }
   }
   calculateFaceLocation = (data) =>{
@@ -49,7 +50,6 @@ class App extends Component {
     }
   }
   displayBox = (box) => {
-    console.log(box);
     this.setState({box: box});
   }
   onInputChange = (event) =>{
@@ -65,17 +65,25 @@ class App extends Component {
       .catch(err => console.log(err)
     )
   }
-  onRouteChange = () =>{
-    this.setState({route: 'home'});
+  onRouteChange = (route) =>{
+      if(route==='signin' || route==='register'){
+        this.setState({isSignedIn: false});
+      }else if(route==='home'){
+        this.setState({isSignedIn: true});
+      }
+      this.setState({route: route});
   }
   render() {
+    const {isSignedIn, imageURL, route, box, } =this.state;
     return (
       <div className="App">
       <Particles className='particles' params={particlesOptions}/>
-        <Navigation/>
+        <Navigation isSignedIn={isSignedIn} onRouteChange={this.onRouteChange}/>
         {
-          this.state.route === 'signin' ?
+          route === 'signin' ?
             <Signin onRouteChange={this.onRouteChange}/>
+          :(route === 'register' ?
+            <Register onRouteChange={this.onRouteChange}/>
           :
             <div>
               <Logo/>
@@ -84,8 +92,9 @@ class App extends Component {
                 onInputChange={this.onInputChange}
                 onButtonSubmit={this.onButtonSubmit}
               />
-              <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/>
+              <FaceRecognition box={box} imageURL={imageURL}/>
             </div>
+          )
         }
       </div>
     );
